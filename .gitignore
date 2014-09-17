@@ -1,0 +1,3 @@
+*.pyc
+logs
+process_*
