@@ -3,44 +3,84 @@ import logging
 import os
 import requests
 import shutil
+import sys
 import time
 
 logging.basicConfig(level       = logging.INFO, 
-                    filename    = 'logs/error.log',
+                    filename    = 'log.txt',
                     format      = '%(asctime)s %(message)s')
-
-pid = time.strftime("%Y%m%d_%H%M%S")
 
 logger = logging
 
-logger.info('start pid '+ pid)
+def testLine(line):
+    print line
 
-new_file_list = fnmatch.filter(os.listdir('.'), 'new*.txt')
-error_file_list = fnmatch.filter(os.listdir('.'), 'error*.txt')
+def processFiles(pid):
+    process_dirname     = 'process_'+ pid
+    success_filename    = process_dirname +'/'+ 'process_success_list.txt'
+    error_filename      = process_dirname +'/'+ 'process_error_list.txt'
 
-if (len(new_file_list) or len(error_file_list)):
-    logger.info('found new/error files. moving new: '+ ', '.join(new_file_list) +' moving error: '+ ', '.join(error_file_list))
+    file_list = fnmatch.filter(os.listdir(process_dirname), 'new*.txt') + fnmatch.filter(os.listdir(process_dirname), 'error*.txt')
 
-    try:
-        process_dirname = 'process_'+ pid
-        os.mkdir(process_dirname)
-        
-        # move the files to process into a temp processing dir
-        for filename in new_file_list:
-            shutil.move(filename, process_dirname +'/'+ filename)
-        
-        for filename in error_file_list:
-            shutil.move(filename, process_dirname +'/'+ filename)
+    if (len(file_list)):
+        try:
+            # make sure we capture the list of already-processed files (if any)
+            success_list = []
 
-        with open('success_list.txt', 'w+') as success_file, open('error_list.txt', 'w+') as error_file:
-            for filename in new_file_list:
-                with open(process_dirname +'/'+ filename, 'r') as processing_file:
-                    for line in processing_file:
-                        print line
-                    
-    except IOError as e:
-        print 'ERROR: '+ e
+            if (os.path.isfile(success_filename)):
+                with open(success_filename, 'r') as success_file:
+                    for line in success_file:
+                        success_list.push(line)
+
+            with open(success_filename, 'a') as success_file, open(error_filename, 'w') as error_file:
+                for filename in file_list:
+                    logger.info('processing file: '+ filename)
+
+                    with open(process_dirname +'/'+ filename, 'r') as processing_file:
+                        for line in processing_file:
+                            if (line not in success_list):
+                                if (testLine(line) === True):
+                                    success_file.write(line)
+                                else:
+                                    error_file.write(line)
+        except IOError as e:
+            print 'ERROR: '+ e
+
+        try:
+            if (os.path.getsize(error_filename)):
+                shutil.move(error_filename, './error_'+ )
+
+def moveFiles(pid):
+    process_dirname = 'process_'+ pid
+
+    file_list = fnmatch.filter(os.listdir('.'), 'new*.txt') + fnmatch.filter(os.listdir('.'), 'error*.txt')
+
+    logger.info(__name__ +' found files: '+ ','.join(file_list))
+
+    if (len(file_list)):
+        try:
+            os.mkdir(process_dirname)
+            
+            # move the files to process into a temp processing dir
+            for filename in file_list:
+                shutil.move(filename, process_dirname +'/'+ filename)
+        except IOError as e:
+            print 'ERROR: '+ e
+
+    return(file_list)
+
+logger.info('start '+ sys.argv[0])
+
+if (sys.argv[1]):
+    # specified an existing run to re-try
+    pid = sys.argv[1]
+
+    processFiles(pid)
 else:
-    logger.info('no new/error files found')
+    # kick off a fresh run
+    pid = time.strftime("%Y%m%d_%H%M%S")
 
-logger.info('end pid '+ pid)
+    if (len(moveFiles(pid))):
+        processFiles(pid)
+
+logger.info('end '+ sys.argv[0])
