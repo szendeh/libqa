@@ -1,3 +1,6 @@
 *.pyc
-logs
+log.txt
 process_*
+new_*
+failed_*
+test*
