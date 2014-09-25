@@ -8,8 +8,8 @@ import time
 
 """
 LibQA
-takes an arbitrary number of files that contain urls delimited by \n and tests them for status==200
-any url that fails or returns something other than 200 is logged and collected into a single failed
+Takes an arbitrary number of files that contain urls delimited by \n and tests them for status==200.
+Any url that fails or returns something other than 200 is logged and collected into a single failed
 file that can be re-tested.
 
 new*.txt files are supplied by an external script
@@ -19,12 +19,15 @@ script attempts to insulate itself from running over itself by creating new temp
 and moving all new* and failed* files into that dir for testing.
 """
 
-
 logging.basicConfig(level       = logging.INFO, 
                     filename    = 'log.txt',
                     format      = '%(asctime)s %(message)s')
 
 logger = logging
+
+# should use ARGV to get this stuff
+prependUrl = 'http://dspace.mit.edu/openaccess-disseminate/'
+appendUrl = ''
 
 def testLine(line):
     """
@@ -34,7 +37,7 @@ def testLine(line):
     """
 
     try:
-        r = requests.get(line)
+        r = requests.get(prependUrl + line + appendUrl)
         if (r.status_code == 200):
             return True
         else:

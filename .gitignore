@@ -1,6 +1,7 @@
-*.pyc
+.DS_Store
+.pyc
 log.txt
-process_*
-new_*
-failed_*
-test*
+process_
+new_
+failed_
+*test*
