@@ -26,7 +26,7 @@ logging.basicConfig(level       = logging.INFO,
 logger = logging
 
 # should use ARGV to get this stuff
-prependUrl = 'http://dspace-dev.mit.edu/openaccess-disseminate/'
+prependUrl = 'http://dspace.mit.edu/openaccess-disseminate/'
 appendUrl = ''
 
 def testLine(line):
@@ -41,10 +41,10 @@ def testLine(line):
         if (r.status_code == 200):
             return True
         else:
-            logger.warning("status: '{}'".format(r.status_code))
+            logger.warning("status: '{0}'".format(r.status_code))
             return False
     except requests.exceptions.RequestException as e:
-        logger.error("REQUEST ERROR: {}".format(e))
+        logger.error("REQUEST ERROR: {0}".format(e))
         return False
 
 def processFiles(pid):
