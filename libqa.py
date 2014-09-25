@@ -26,7 +26,7 @@ logging.basicConfig(level       = logging.INFO,
 logger = logging
 
 # should use ARGV to get this stuff
-prependUrl = 'http://dspace.mit.edu/openaccess-disseminate/'
+prependUrl = 'http://dspace-dev.mit.edu/openaccess-disseminate/'
 appendUrl = ''
 
 def testLine(line):
@@ -84,25 +84,26 @@ def processFiles(pid):
                     for line in success_file:
                         tested_list.append(line.strip())
 
-            with open(success_filename, 'a') as success_file, open(failed_filename, 'w') as failed_file:
-                for filename in file_list:
-                    logger.info('processing file: '+ filename)
+            with open(success_filename, 'a') as success_file:
+                with open(failed_filename, 'w') as failed_file:
+                    for filename in file_list:
+                        logger.info('processing file: '+ filename)
 
-                    with open(process_dirname +'/'+ filename, 'r') as processing_file:
-                        for line in processing_file:
-                            line = line.strip()
-                            
-                            logger.info("testing line '"+ line +"'")
+                        with open(process_dirname +'/'+ filename, 'r') as processing_file:
+                            for line in processing_file:
+                                line = line.strip()
+                                
+                                logger.info("testing line '"+ line +"'")
 
-                            if (line in tested_list):
-                                logger.warning("duplicate line")
-                            else:
-                                if (testLine(line) == True):
-                                    success_file.write(line +"\n")
+                                if (line in tested_list):
+                                    logger.warning("duplicate line")
                                 else:
-                                    failed_file.write(line +"\n")
+                                    if (testLine(line) == True):
+                                        success_file.write(line +"\n")
+                                    else:
+                                        failed_file.write(line +"\n")
 
-                            tested_list.append(line)
+                                tested_list.append(line)
 
             if (os.path.getsize(failed_filename)):
                 shutil.move(failed_filename, './failed_'+ pid +'.txt')
